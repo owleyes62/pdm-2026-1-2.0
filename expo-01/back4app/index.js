@@ -8,6 +8,7 @@ const headers = {
 const headersJson = {
   ...headers,
   "Content-Type": "application/json",
+  "Accept": "application/json",
 };
 
 export async function getTarefas() {

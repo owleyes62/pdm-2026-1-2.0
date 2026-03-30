@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Switch } from "react-native";
+import { atualizarTarefa, deletarTarefa } from "@/back4app";
 import {
   ActivityIndicator,
   Alert,
@@ -19,22 +21,46 @@ export default function TarefasPage() {
   });
   const mutation = useMutation({
     mutationFn: adicionarTarefa,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("SALVOU:", data);
       queryClient.invalidateQueries({ queryKey: ["tarefas"] });
+    },
+    onError: (error) => {
+      console.log("ERRO:", error);
     },
   });
   const [descricao, setDescricao] = useState("");
 
   async function handleAdicionarTarefaPress() {
-    if (descricao.trim() === "") {
-      Alert.alert("Descrição inválida", "Preencha a descrição da tarefa", [
-        { text: "OK", onPress: () => {} },
-      ]);
-      return;
-    }
-    mutation.mutate({ descricao });
-    setDescricao("");
+  console.log("VALOR DIGITADO:", descricao);
+
+  if (!descricao || descricao.trim() === "") {
+    Alert.alert("Erro", "Digite uma descrição válida");
+    return;
   }
+
+  mutation.mutate({
+    descricao: String(descricao),
+    concluida: false,
+  });
+
+  setDescricao("");
+}
+
+  const atualizarMutation = useMutation({
+  mutationFn: ({ id, dados }) => atualizarTarefa(id, dados),
+  onSuccess: (data) => {
+    console.log("ATUALIZOU:", data);
+    queryClient.invalidateQueries({ queryKey: ["tarefas"] });
+  },
+});
+
+const deletarMutation = useMutation({
+  mutationFn: deletarTarefa,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["tarefas"] });
+  },
+});
 
   return (
     <View style={styles.container}>
@@ -52,13 +78,27 @@ export default function TarefasPage() {
       />
       <View style={styles.hr} />
       <View style={styles.tasksContainer}>
-        {data?.map((t) => (
-          <Text
-            key={t.objectId}
-            style={t.concluida && styles.strikethroughText}
-          >
-            {t.descricao}
-          </Text>
+                {data?.map((t) => (
+          <View key={t.objectId} style={styles.taskItem}>
+            <Switch
+              value={t.concluida}
+              onValueChange={(value) =>
+                atualizarMutation.mutate({
+                  id: t.objectId,
+                  dados: { concluida: value },
+                })
+              }
+            />
+
+            <Text style={t.concluida && styles.strikethroughText}>
+              {t.descricao}
+            </Text>
+
+            <Button
+              title="X"
+              onPress={() => deletarMutation.mutate(t.objectId)}
+            />
+          </View>
         ))}
       </View>
     </View>
@@ -91,5 +131,11 @@ const styles = StyleSheet.create({
     textDecorationStyle: "solid", // Optional: Style of the line
     textDecorationColor: "red", // Optional: Color of the line (iOS only)
     // Other styles like fontSize, fontWeight, color can also be applied
+  },
+    taskItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 5,
   },
 });

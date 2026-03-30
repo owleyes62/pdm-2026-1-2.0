@@ -11,8 +11,8 @@ export default function Index() {
       }}
     >
       <Text>Olá, Turma!</Text>
-      <View style={{ width: 100, backgroundColor: "blue", flex: 0.1 }} />
-      <View style={{ width: 100, backgroundColor: "red", flex: 0.4 }} />
+      <View style={{ width: 100, height: 50, backgroundColor: "blue" }} />
+      <View style={{ width: 100, height: 100, backgroundColor: "red" }} />
       <Link href="/about">About</Link>
       <Link href="/tarefas">Tarefas</Link>
     </View>

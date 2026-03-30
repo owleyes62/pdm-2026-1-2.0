@@ -47,14 +47,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9858e7ed-da74-4f2b-8fa2-f07544205e7d"
+        "projectId": "959152c7-d221-440a-82b8-d61fe2cc3138"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/9858e7ed-da74-4f2b-8fa2-f07544205e7d"
-    }
+      "url": "https://u.expo.dev/959152c7-d221-440a-82b8-d61fe2cc3138"
+    },
+    "owner": "iwerson62"
   }
 }
