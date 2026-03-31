@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Switch } from "react-native";
+import { Link } from "expo-router";
+import { Pressable, Switch } from "react-native";
 import { atualizarTarefa, deletarTarefa } from "@/back4app";
 import {
   ActivityIndicator,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adicionarTarefa, getTarefas } from "@/back4app";
+import { Route } from "expo-router/build/Route";
 
 export default function TarefasPage() {
   const queryClient = useQueryClient();
@@ -90,9 +92,13 @@ const deletarMutation = useMutation({
               }
             />
 
-            <Text style={t.concluida && styles.strikethroughText}>
-              {t.descricao}
-            </Text>
+            <Link href={`/tarefas/${t.objectId}`} asChild>
+              <Pressable>
+                <Text style={t.concluida && styles.strikethroughText}>
+                  {t.descricao}
+                </Text>
+              </Pressable>
+            </Link>
 
             <Button
               title="X"

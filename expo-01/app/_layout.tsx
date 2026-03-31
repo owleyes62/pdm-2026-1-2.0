@@ -10,6 +10,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ title: "Home" }} />
         <Stack.Screen name="about" options={{ title: "--- Sobre ---" }} />
         <Stack.Screen name="tarefas/index" options={{ title: "Tarefas" }} />
+        <Stack.Screen name="tarefas/[id]" options={{ title: "Detalhes da Tarefa" }} />
       </Stack>
     </QueryClientProvider>
   );
