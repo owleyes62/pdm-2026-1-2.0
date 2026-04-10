@@ -1,5 +1,6 @@
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Button } from "react-native";
 import { Link } from "expo-router";
+import * as Linking from 'expo-linking';
 
 export default function Index() {
   return (
@@ -24,6 +25,8 @@ export default function Index() {
             <Text style={styles.buttonText}>Tarefas</Text>
           </TouchableOpacity>
         </Link>
+
+        
       </View>
     </View>
   );
