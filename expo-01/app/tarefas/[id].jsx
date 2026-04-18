@@ -1,10 +1,10 @@
+import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, TextInput, Switch } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
 import * as Clipboard from "expo-clipboard";
 import { getTarefaById, atualizarTarefa } from "@/neon";
-import { useState, useEffect } from "react";
 
 export default function TarefaDetalhe() {
   const { id } = useLocalSearchParams();
@@ -16,18 +16,18 @@ export default function TarefaDetalhe() {
   const [descricao, setDescricao] = useState("");
   const [concluida, setConcluida] = useState(false);
 
-  const { data: tarefa, isLoading } = useQuery({
+  const { data: tarefa, isLoading, isPending } = useQuery({
     queryKey: ["tarefa", id],
     queryFn: () => getTarefaById(id),
   });
 
   useEffect(() => {
     if (tarefa) {
-      setTitulo(tarefa.titulo);
-      setDescricao(tarefa.descricao);
-      setConcluida(tarefa.concluida);
+      setTitulo(tarefa.titulo ?? "");
+      setDescricao(tarefa.descricao ?? "");
+      setConcluida(tarefa.concluida ?? false);
     }
-  }, [tarefa]);
+  }, [tarefa]);;
 
   const atualizarMutation = useMutation({
     mutationFn: (dados) => atualizarTarefa(id, dados),
@@ -55,9 +55,11 @@ export default function TarefaDetalhe() {
   };
 
   const handleCancelar = () => {
+  if (tarefa) {
     setTitulo(tarefa.titulo);
     setDescricao(tarefa.descricao);
     setConcluida(tarefa.concluida);
+  }
     setEditando(false);
   };
 
@@ -67,18 +69,10 @@ export default function TarefaDetalhe() {
     Alert.alert("Copiado!", "Link da tarefa copiado para a área de transferência.");
   };
 
-  if (isLoading) {
+  if (isLoading || isPending || !tarefa) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#4A90E2" />
-      </View>
-    );
-  }
-
-  if (!tarefa) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Tarefa não encontrada.</Text>
       </View>
     );
   }
