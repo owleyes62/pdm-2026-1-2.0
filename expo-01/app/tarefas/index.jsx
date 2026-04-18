@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "expo-router";
 import { Pressable, Switch } from "react-native";
-import { atualizarTarefa, deletarTarefa } from "@/back4app";
+import { atualizarTarefa, deletarTarefa, adicionarTarefa, getTarefas } from "@/neon";
 import {
   ActivityIndicator,
   Alert,
@@ -12,7 +12,6 @@ import {
   View,
 } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { adicionarTarefa, getTarefas } from "@/back4app";
 import { Route } from "expo-router/build/Route";
 
 export default function TarefasPage() {
