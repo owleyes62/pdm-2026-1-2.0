@@ -1,32 +1,34 @@
-import { Text, View, StyleSheet, TouchableOpacity, Button } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Link } from "expo-router";
-import * as Linking from 'expo-linking';
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Olá, Turma 👋</Text>
+      <View style={styles.header}>
+        <Text style={styles.emoji}>📋</Text>
+        <Text style={styles.title}>TaskApp</Text>
+        <Text style={styles.subtitle}>Gerencie suas tarefas com simplicidade</Text>
+      </View>
 
       <View style={styles.card}>
+        <Text style={styles.cardTitle}>Bem-vindo!</Text>
         <Text style={styles.cardText}>
-          Bem-vindo ao app de tarefas
+          Crie, organize e acompanhe suas tarefas do dia a dia de forma simples e eficiente.
         </Text>
       </View>
 
       <View style={styles.buttonsContainer}>
-        <Link href="/about" asChild>
-          <TouchableOpacity style={styles.buttonSecondary}>
-            <Text style={styles.buttonText}>Sobre</Text>
-          </TouchableOpacity>
-        </Link>
-
         <Link href="/tarefas" asChild>
           <TouchableOpacity style={styles.buttonPrimary}>
-            <Text style={styles.buttonText}>Tarefas</Text>
+            <Text style={styles.buttonText}>📋  Ver Tarefas</Text>
           </TouchableOpacity>
         </Link>
 
-        
+        <Link href="/about" asChild>
+          <TouchableOpacity style={styles.buttonSecondary}>
+            <Text style={styles.buttonTextSecondary}>Sobre o App</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
     </View>
   );
@@ -35,56 +37,78 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f0f4f8",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 24,
   },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-
-  card: {
-    width: "100%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 12,
+  header: {
+    alignItems: "center",
     marginBottom: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
   },
-
-  cardText: {
-    fontSize: 16,
+  emoji: {
+    fontSize: 52,
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#1a1a1a",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginTop: 4,
     textAlign: "center",
   },
-
+  card: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    marginBottom: 8,
+  },
+  cardText: {
+    fontSize: 14,
+    color: "#6b7280",
+    lineHeight: 22,
+  },
   buttonsContainer: {
     width: "100%",
-    gap: 10,
+    gap: 12,
   },
-
   buttonPrimary: {
-    backgroundColor: "#007bff",
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: "#4A90E2",
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
   },
-
   buttonSecondary: {
-    backgroundColor: "#6c757d",
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
   },
-
   buttonText: {
-    color: "white",
-    fontWeight: "bold",
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  buttonTextSecondary: {
+    color: "#4A90E2",
+    fontWeight: "700",
+    fontSize: 15,
   },
 });

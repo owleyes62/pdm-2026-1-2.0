@@ -1,111 +1,70 @@
-import { useState } from "react";
-import { Link } from "expo-router";
-import { Pressable, Switch } from "react-native";
-import { atualizarTarefa, deletarTarefa, adicionarTarefa, getTarefas } from "@/neon";
-import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { View, Text, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Route } from "expo-router/build/Route";
+import { getTarefas, adicionarTarefa, atualizarTarefa, deletarTarefa } from "@/neon";
+import TarefaCard from "../components/TarefaCard";
+import AddTarefaForm from "../components/AddTarefaForm";
 
 export default function TarefasPage() {
   const queryClient = useQueryClient();
+
   const { data, isFetching } = useQuery({
     queryKey: ["tarefas"],
     queryFn: getTarefas,
   });
-  const mutation = useMutation({
+
+  const adicionarMutation = useMutation({
     mutationFn: adicionarTarefa,
-    onSuccess: (data) => {
-      console.log("SALVOU:", data);
-      queryClient.invalidateQueries({ queryKey: ["tarefas"] });
-    },
-    onError: (error) => {
-      console.log("ERRO:", error);
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tarefas"] }),
   });
-  const [descricao, setDescricao] = useState("");
-
-  async function handleAdicionarTarefaPress() {
-  console.log("VALOR DIGITADO:", descricao);
-
-  if (!descricao || descricao.trim() === "") {
-    Alert.alert("Erro", "Digite uma descrição válida");
-    return;
-  }
-
-  mutation.mutate({
-    descricao: String(descricao),
-    concluida: false,
-  });
-
-  setDescricao("");
-}
 
   const atualizarMutation = useMutation({
-  mutationFn: ({ id, dados }) => atualizarTarefa(id, dados),
-  onSuccess: (data) => {
-    console.log("ATUALIZOU:", data);
-    queryClient.invalidateQueries({ queryKey: ["tarefas"] });
-  },
-});
+    mutationFn: ({ id, dados }) => atualizarTarefa(id, dados),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tarefas"] }),
+  });
 
-const deletarMutation = useMutation({
-  mutationFn: deletarTarefa,
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["tarefas"] });
-  },
-});
+  const deletarMutation = useMutation({
+    mutationFn: deletarTarefa,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tarefas"] }),
+  });
+
+  const pendentes = data?.filter((t) => !t.concluida) ?? [];
+  const concluidas = data?.filter((t) => t.concluida) ?? [];
 
   return (
     <View style={styles.container}>
-      {(isFetching || mutation.isPending) && <ActivityIndicator size="large" />}
-      <TextInput
-        style={styles.input}
-        placeholder="Descrição"
-        value={descricao}
-        onChangeText={setDescricao}
+      <AddTarefaForm
+        onAdicionar={(dados) => adicionarMutation.mutate(dados)}
+        isLoading={adicionarMutation.isPending}
       />
-      <Button
-        title="Adicionar Tarefa"
-        onPress={handleAdicionarTarefaPress}
-        disabled={mutation.isPending}
-      />
-      <View style={styles.hr} />
-      <View style={styles.tasksContainer}>
-                {data?.map((t) => (
-          <View key={t.objectId} style={styles.taskItem}>
-            <Switch
-              value={t.concluida}
-              onValueChange={(value) =>
-                atualizarMutation.mutate({
-                  id: t.objectId,
-                  dados: { concluida: value },
-                })
+
+      {isFetching && <ActivityIndicator size="large" color="#4A90E2" style={{ marginBottom: 10 }} />}
+
+      <FlatList
+        data={[
+          { type: "header", title: `Pendentes (${pendentes.length})` },
+          ...pendentes.map((t) => ({ type: "tarefa", ...t })),
+          { type: "header", title: `Concluídas (${concluidas.length})` },
+          ...concluidas.map((t) => ({ type: "tarefa", ...t })),
+        ]}
+        keyExtractor={(item, index) =>
+          item.type === "header" ? `header-${index}` : item.objectId
+        }
+        renderItem={({ item }) => {
+          if (item.type === "header") {
+            return <Text style={styles.sectionTitle}>{item.title}</Text>;
+          }
+          return (
+            <TarefaCard
+              tarefa={item}
+              onToggle={(id, value) =>
+                atualizarMutation.mutate({ id, dados: { concluida: value } })
               }
+              onDelete={(id) => deletarMutation.mutate(id)}
             />
-
-            <Link href={`/tarefas/${t.objectId}`} asChild>
-              <Pressable>
-                <Text style={t.concluida && styles.strikethroughText}>
-                  {t.descricao}
-                </Text>
-              </Pressable>
-            </Link>
-
-            <Button
-              title="X"
-              onPress={() => deletarMutation.mutate(t.objectId)}
-            />
-          </View>
-        ))}
-      </View>
+          );
+        }}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 }
@@ -113,34 +72,17 @@ const deletarMutation = useMutation({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    padding: 10,
+    backgroundColor: "#f0f4f8",
+    padding: 16,
+    paddingTop: 20,
   },
-  tasksContainer: {
-    paddingLeft: 15,
-  },
-  input: {
-    borderColor: "black",
-    borderWidth: 1,
-    width: "90%",
-    marginBottom: 5,
-  },
-  hr: {
-    height: 1,
-    backgroundColor: "black",
-    width: "95%",
-    marginVertical: 10,
-  },
-  strikethroughText: {
-    textDecorationLine: "line-through", // Key property for strikethrough
-    textDecorationStyle: "solid", // Optional: Style of the line
-    textDecorationColor: "red", // Optional: Color of the line (iOS only)
-    // Other styles like fontSize, fontWeight, color can also be applied
-  },
-    taskItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 5,
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#6b7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    marginTop: 4,
   },
 });

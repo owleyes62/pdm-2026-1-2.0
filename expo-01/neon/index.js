@@ -29,3 +29,8 @@ export async function deletarTarefa(id) {
   const response = await axios.delete(`${urlBase}/${id}`);
   return response.data;
 }
+
+export async function getTarefaById(id) {
+  const response = await axios.get(`${urlBase}/${id}`);
+  return response.data;
+}
