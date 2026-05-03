@@ -3,9 +3,11 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { CurriculoProvider } from '../hooks/useCurriculo';
+
 export default function RootLayout() {
   return (
-    <>
+    <CurriculoProvider>
       <StatusBar style="light" />
 
       <Stack
@@ -16,6 +18,6 @@ export default function RootLayout() {
           },
         }}
       />
-    </>
+    </CurriculoProvider>
   );
 }

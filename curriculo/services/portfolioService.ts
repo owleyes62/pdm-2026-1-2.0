@@ -11,21 +11,19 @@ import type {
   Idioma,
 } from '../types';
 
-export const BASE_URL = 'https://musical-engine-5j4wg95r4wxf5rw-3000.app.github.dev';
-export const PESSOA_ID = 12;
+export const BASE_URL = 'https://curriculo-one-omega.vercel.app';
 
 async function request<T>(path: string): Promise<T> {
   const url = `${BASE_URL}${path}`;
 
   try {
+    console.log('FETCH URL:', url);
+
     const response = await fetch(url);
 
     if (!response.ok) {
       const text = await response.text();
-
-      throw new Error(
-        `Erro HTTP ${response.status} ao buscar ${path}: ${text}`
-      );
+      throw new Error(`Erro HTTP ${response.status} ao buscar ${path}: ${text}`);
     }
 
     const json = (await response.json()) as ApiResponse<T>;
@@ -47,49 +45,39 @@ async function request<T>(path: string): Promise<T> {
 }
 
 export const portfolioService = {
-  getPessoa() {
-    return request<Pessoa>(`/api/pessoas/${PESSOA_ID}`);
+  getPessoas() {
+    return request<Pessoa[]>('/api/pessoas');
   },
 
-  getExperiencias() {
-    return request<Experiencia[]>(
-      `/api/pessoas/${PESSOA_ID}/experiencias`
-    );
+  getPessoa(pessoaId: number) {
+    return request<Pessoa>(`/api/pessoas/${pessoaId}`);
   },
 
-  getFormacoes() {
-    return request<Formacao[]>(
-      `/api/pessoas/${PESSOA_ID}/formacoes`
-    );
+  getExperiencias(pessoaId: number) {
+    return request<Experiencia[]>(`/api/pessoas/${pessoaId}/experiencias`);
   },
 
-  getHabilidades() {
-    return request<Habilidade[]>(
-      `/api/pessoas/${PESSOA_ID}/habilidades`
-    );
+  getFormacoes(pessoaId: number) {
+    return request<Formacao[]>(`/api/pessoas/${pessoaId}/formacoes`);
   },
 
-  getProjetos() {
-    return request<Projeto[]>(
-      `/api/pessoas/${PESSOA_ID}/projetos`
-    );
+  getHabilidades(pessoaId: number) {
+    return request<Habilidade[]>(`/api/pessoas/${pessoaId}/habilidades`);
   },
 
-  getCertificados() {
-    return request<Certificado[]>(
-      `/api/pessoas/${PESSOA_ID}/certificados`
-    );
+  getProjetos(pessoaId: number) {
+    return request<Projeto[]>(`/api/pessoas/${pessoaId}/projetos`);
   },
 
-  getIdiomas() {
-    return request<Idioma[]>(
-      `/api/pessoas/${PESSOA_ID}/idiomas`
-    );
+  getCertificados(pessoaId: number) {
+    return request<Certificado[]>(`/api/pessoas/${pessoaId}/certificados`);
   },
 
-  getProjetoPorId(id: number) {
-    return request<Projeto>(
-      `/api/pessoas/${PESSOA_ID}/projetos/${id}`
-    );
+  getIdiomas(pessoaId: number) {
+    return request<Idioma[]>(`/api/pessoas/${pessoaId}/idiomas`);
+  },
+
+  getProjetoPorId(pessoaId: number, projetoId: number) {
+    return request<Projeto>(`/api/pessoas/${pessoaId}/projetos/${projetoId}`);
   },
 };

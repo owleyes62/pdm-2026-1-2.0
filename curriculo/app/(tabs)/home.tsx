@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePortfolio } from '../../hooks/usePortfolio';
 import { AppError, AppHeader, AppLoading, AppCard, SectionTitle } from '../../components/ui';
 import { ProfileHero, SkillList, ProjectCard } from '../../components/portfolio';
+import { CurriculoDropdown } from '../../components/ui';
 
 export default function HomeScreen() {
   const { data, loading, error, refetch } = usePortfolio();
@@ -27,6 +28,8 @@ export default function HomeScreen() {
           title="Meu Portfólio"
           subtitle="Currículo digital desenvolvido com React Native, Expo Router e back-end próprio."
         />
+
+        <CurriculoDropdown />
 
         <ProfileHero pessoa={data.pessoa} />
 

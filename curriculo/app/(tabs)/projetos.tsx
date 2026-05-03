@@ -7,6 +7,7 @@ import { usePortfolio } from '../../hooks/usePortfolio';
 import { useFavorites } from '../../hooks/useFavorites';
 import { AppCard, AppError, AppHeader, AppLoading, SectionTitle } from '../../components/ui';
 import { ProjectCard } from '../../components/portfolio';
+import { CurriculoDropdown } from '../../components/ui';
 
 export default function ProjetosScreen() {
   const { data, loading, error, refetch } = usePortfolio();
@@ -30,6 +31,8 @@ export default function ProjetosScreen() {
           subtitle="Projetos desenvolvidos e cadastrados no back-end."
         />
 
+        <CurriculoDropdown />
+        
         <AppCard style={styles.extraCard}>
           <Text style={styles.extraTitle}>⭐ Funcionalidade extra</Text>
           <Text style={styles.extraText}>

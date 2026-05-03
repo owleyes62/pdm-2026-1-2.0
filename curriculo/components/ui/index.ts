@@ -6,3 +6,4 @@ export * from './AppLoading';
 export * from './AppError';
 export * from './AppTag';
 export * from './SectionTitle';
+export * from './CurriculoDropdown';

@@ -1,8 +1,10 @@
 // hooks/usePortfolio.ts
 
 import { useCallback } from 'react';
+
 import { portfolioService } from '../services/portfolioService';
 import { useApi } from './useApi';
+import { useCurriculo } from './useCurriculo';
 
 import type {
   Pessoa,
@@ -25,7 +27,13 @@ interface PortfolioData {
 }
 
 export function usePortfolio() {
+  const { selectedPessoaId } = useCurriculo();
+
   const fetchPortfolio = useCallback(async (): Promise<PortfolioData> => {
+    if (!selectedPessoaId) {
+      throw new Error('Nenhum currículo selecionado');
+    }
+
     const [
       pessoa,
       experiencias,
@@ -35,13 +43,13 @@ export function usePortfolio() {
       certificados,
       idiomas,
     ] = await Promise.all([
-      portfolioService.getPessoa(),
-      portfolioService.getExperiencias(),
-      portfolioService.getFormacoes(),
-      portfolioService.getHabilidades(),
-      portfolioService.getProjetos(),
-      portfolioService.getCertificados(),
-      portfolioService.getIdiomas(),
+      portfolioService.getPessoa(selectedPessoaId),
+      portfolioService.getExperiencias(selectedPessoaId),
+      portfolioService.getFormacoes(selectedPessoaId),
+      portfolioService.getHabilidades(selectedPessoaId),
+      portfolioService.getProjetos(selectedPessoaId),
+      portfolioService.getCertificados(selectedPessoaId),
+      portfolioService.getIdiomas(selectedPessoaId),
     ]);
 
     return {
@@ -53,7 +61,7 @@ export function usePortfolio() {
       certificados,
       idiomas,
     };
-  }, []);
+  }, [selectedPessoaId]);
 
-  return useApi<PortfolioData>(fetchPortfolio);
+  return useApi<PortfolioData>(fetchPortfolio, !!selectedPessoaId);
 }

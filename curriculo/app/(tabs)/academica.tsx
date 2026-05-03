@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePortfolio } from '../../hooks/usePortfolio';
 import { AppError, AppHeader, AppLoading, SectionTitle } from '../../components/ui';
 import { EducationCard } from '../../components/portfolio';
+import { CurriculoDropdown } from '../../components/ui';
 
 export default function AcademicaScreen() {
   const { data, loading, error, refetch } = usePortfolio();
@@ -25,6 +26,8 @@ export default function AcademicaScreen() {
           title="Experiência Acadêmica"
           subtitle="Formações, cursos e trajetória acadêmica carregados pelo back-end."
         />
+
+        <CurriculoDropdown />
 
         <SectionTitle
           icon="🎓"

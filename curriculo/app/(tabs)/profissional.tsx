@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePortfolio } from '../../hooks/usePortfolio';
 import { AppError, AppHeader, AppLoading, SectionTitle } from '../../components/ui';
 import { ExperienceCard } from '../../components/portfolio';
+import { CurriculoDropdown } from '../../components/ui';
 
 export default function ProfissionalScreen() {
   const { data, loading, error, refetch } = usePortfolio();
@@ -25,6 +26,8 @@ export default function ProfissionalScreen() {
           title="Experiência Profissional"
           subtitle="Histórico profissional, cargos, empresas e atividades realizadas."
         />
+
+        <CurriculoDropdown />
 
         <SectionTitle
           icon="💼"
