@@ -8,18 +8,30 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+
+        // joga a tab bar para o topo
+        tabBarPosition: 'top',
+
         tabBarActiveTintColor: '#38BDF8',
         tabBarInactiveTintColor: '#64748B',
+
         tabBarStyle: {
           backgroundColor: '#020617',
-          borderTopColor: '#1E293B',
-          height: 64,
+          borderBottomColor: '#1E293B',
+          borderBottomWidth: 1,
+          borderTopWidth: 0,
+          height: 62,
           paddingTop: 8,
-          paddingBottom: 8,
+          paddingBottom: 6,
         },
+
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '700',
+        },
+
+        tabBarItemStyle: {
+          paddingVertical: 4,
         },
       }}
     >
@@ -67,5 +79,5 @@ export default function TabsLayout() {
 }
 
 function TabIcon({ icon, color }: { icon: string; color: string }) {
-  return <Text style={{ color, fontSize: 18 }}>{icon}</Text>;
+  return <Text style={{ color, fontSize: 17 }}>{icon}</Text>;
 }
