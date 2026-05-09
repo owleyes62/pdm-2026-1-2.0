@@ -1,5 +1,5 @@
 import { useRef, useContext } from "react";
-import { Modal, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
@@ -16,37 +16,25 @@ export function DraggableItem({ item }: { item: string }) {
   const initialY = useSharedValue(0);
   const itemRef = useRef<Animated.View>(null);
 
-  const { zones, onDrop, dragging, setDragging } =
-    useContext(DropZoneContext);
+  const { zones, onDrop, dragging, setDragging } = useContext(DropZoneContext);
 
   const isDraggingThis = dragging?.item === item;
 
-  const startDragging = (x: number, y: number) => {
-  setDragging({ item, x, y });
-};
+  const startDragging = () => {
+    itemRef.current?.measureInWindow((x, y, width, height) => {
+      initialX.value = x + width / 2;
+      initialY.value = y + height / 2;
+      setDragging({ item, x: initialX.value, y: initialY.value });
+    });
+  };
 
-const stopDragging = (zoneKey: string | null) => {
-  setDragging(null);
-  onDrop?.(item, zoneKey);
-};
+  const updateDragging = (tx: number, ty: number) => {
+    setDragging({ item, x: initialX.value + tx, y: initialY.value + ty });
+  };
 
-const gesture = Gesture.Pan()
-  .onStart(() => {
-    runOnJS((cb: () => void) => {
-      itemRef.current?.measureInWindow((x, y, width, height) => {
-        initialX.value = x + width / 2;
-        initialY.value = y + height / 2;
-        cb();
-      });
-    })(() => runOnJS(startDragging)(initialX.value, initialY.value));
-  })
-  .onUpdate((e) => {
-    translateX.value = e.translationX;
-    translateY.value = e.translationY;
-  })
-  .onEnd((e) => {
-    const finalX = initialX.value + e.translationX;
-    const finalY = initialY.value + e.translationY;
+  const stopDragging = (tx: number, ty: number) => {
+    const finalX = initialX.value + tx;
+    const finalY = initialY.value + ty;
 
     let matched = null;
     for (const z of zones || []) {
@@ -61,36 +49,35 @@ const gesture = Gesture.Pan()
       }
     }
 
-    translateX.value = withSpring(0);
-    translateY.value = withSpring(0);
-    runOnJS(stopDragging)(matched ? matched.key : null);
-  });
+    setDragging(null);
+    onDrop?.(item, matched ? matched.key : null);
+  };
 
-  const portalStyle = useAnimatedStyle(() => ({
-    position: "absolute",
-    left: initialX.value - 40 + translateX.value,
-    top: initialY.value - 40 + translateY.value,
-    opacity: isDraggingThis ? 1 : 0,
-  }));
+  const gesture = Gesture.Pan()
+    .onStart(() => {
+      runOnJS(startDragging)();
+    })
+    .onUpdate((e) => {
+      translateX.value = e.translationX;
+      translateY.value = e.translationY;
+      runOnJS(updateDragging)(e.translationX, e.translationY);
+    })
+    .onEnd((e) => {
+      translateX.value = withSpring(0);
+      translateY.value = withSpring(0);
+      runOnJS(stopDragging)(e.translationX, e.translationY);
+    });
 
   const originalStyle = useAnimatedStyle(() => ({
     opacity: isDraggingThis ? 0 : 1,
   }));
 
   return (
-    <>
-      <GestureDetector gesture={gesture}>
-        <Animated.View ref={itemRef} style={[styles.item, originalStyle]}>
-          <Text style={styles.itemText}>{item}</Text>
-        </Animated.View>
-      </GestureDetector>
-
-      <Modal visible={isDraggingThis} transparent animationType="none">
-        <Animated.View style={[styles.item, portalStyle]}>
-          <Text style={styles.itemText}>{item}</Text>
-        </Animated.View>
-      </Modal>
-    </>
+    <GestureDetector gesture={gesture}>
+      <Animated.View ref={itemRef} style={[styles.item, originalStyle]}>
+        <Text style={styles.itemText}>{item}</Text>
+      </Animated.View>
+    </GestureDetector>
   );
 }
 

@@ -6,6 +6,7 @@ import DropZoneContext, {
 import { useCallback, useRef, useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import DraggingOverlay from "@/components/DraggingOverlay";
 
 export default function GostoNaoGosto() {
   const allItems = ["Maçã", "Banana", "Laranja", "Uva", "Abacate", "Pera"];
@@ -46,37 +47,22 @@ export default function GostoNaoGosto() {
     setItemZone((prev) => ({ ...prev, [item]: zoneKey }));
   }, []);
 
-  const onDragStart = useCallback((item: string) => {
-    // tira o item da zona ao começar a arrastar
-    setItemZone((prev) => ({ ...prev, [item]: null }));
-  }, []);
-
   const pendingItems = allItems.filter((i) => itemZone[i] === null);
   const gostoItems = allItems.filter((i) => itemZone[i] === "gosto");
   const naoGostoItems = allItems.filter((i) => itemZone[i] === "nao_gosto");
 
   return (
-    <DropZoneContext.Provider
-      value={{
-        zones,
-        onDrop,
-        onDragStart,
-        dragging,
-        setDragging,
-      }}
-    >
+    <DropZoneContext.Provider value={{ zones, onDrop, dragging, setDragging }}>
       <GestureHandlerRootView style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
           <Text style={styles.title}>Arraste para Gosto ou Não Gosto</Text>
 
-          {/* Itens pendentes */}
           <View style={styles.dragArea}>
             {pendingItems.map((item) => (
               <DraggableItem key={item} item={item} />
             ))}
           </View>
 
-          {/* Drop Zones */}
           <View style={styles.dropZones}>
             <View
               ref={gostoRef}
@@ -105,6 +91,9 @@ export default function GostoNaoGosto() {
             </View>
           </View>
         </SafeAreaView>
+
+        {/* Overlay: renderiza o clone DENTRO do GestureHandlerRootView */}
+        <DraggingOverlay />
       </GestureHandlerRootView>
     </DropZoneContext.Provider>
   );
