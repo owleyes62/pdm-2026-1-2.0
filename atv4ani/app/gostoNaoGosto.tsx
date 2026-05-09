@@ -1,51 +1,118 @@
 import DraggableItem from "@/components/DraggableItem";
+import DropZoneContext, {
+  DraggingState,
+  ZoneBounds,
+} from "@/components/DropZoneContext";
+import { useCallback, useRef, useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function GostoNaoGosto() {
-  const items = ["Maçã", "Banana", "Laranja", "Uva", "Abacate", "Pera"];
+  const allItems = ["Maçã", "Banana", "Laranja", "Uva", "Abacate", "Pera"];
+
+  const [zones, setZones] = useState<ZoneBounds[]>([]);
+  const [dragging, setDragging] = useState<DraggingState>(null);
+  const [itemZone, setItemZone] = useState<Record<string, string | null>>(
+    Object.fromEntries(allItems.map((i) => [i, null]))
+  );
+
+  const gostoRef = useRef<View>(null);
+  const naoGostoRef = useRef<View>(null);
+  const measured = useRef<ZoneBounds[]>([]);
+
+  const measureZone = useCallback(
+    (key: string, ref: React.RefObject<View | null>) => {
+      ref.current?.measure((fx, fy, width, height, px, py) => {
+        const zone: ZoneBounds = {
+          key,
+          left: px,
+          top: py,
+          right: px + width,
+          bottom: py + height,
+          centerX: px + width / 2,
+          centerY: py + height / 2,
+        };
+        measured.current = [
+          ...measured.current.filter((z) => z.key !== key),
+          zone,
+        ];
+        setZones([...measured.current]);
+      });
+    },
+    []
+  );
+
+  const onDrop = useCallback((item: string, zoneKey: string | null) => {
+    setItemZone((prev) => ({ ...prev, [item]: zoneKey }));
+  }, []);
+
+  const onDragStart = useCallback((item: string) => {
+    // tira o item da zona ao começar a arrastar
+    setItemZone((prev) => ({ ...prev, [item]: null }));
+  }, []);
+
+  const pendingItems = allItems.filter((i) => itemZone[i] === null);
+  const gostoItems = allItems.filter((i) => itemZone[i] === "gosto");
+  const naoGostoItems = allItems.filter((i) => itemZone[i] === "nao_gosto");
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <Text style={styles.title}>Arraste para Gosto ou Não Gosto</Text>
+    <DropZoneContext.Provider
+      value={{
+        zones,
+        onDrop,
+        onDragStart,
+        dragging,
+        setDragging,
+      }}
+    >
+      <GestureHandlerRootView style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <Text style={styles.title}>Arraste para Gosto ou Não Gosto</Text>
 
-        {/* Área de itens arrastáveis */}
-        <View style={styles.dragArea}>
-          {items.map((item, index) => (
-            <DraggableItem key={index} item={item} />
-          ))}
-        </View>
+          {/* Itens pendentes */}
+          <View style={styles.dragArea}>
+            {pendingItems.map((item) => (
+              <DraggableItem key={item} item={item} />
+            ))}
+          </View>
 
-        {/* Drop Zones - Duas colunas */}
-        <View style={styles.dropZones}>
-          <View style={styles.dropZone}>
-            <Text style={styles.zoneTitle}>👍 Gosto</Text>
-            {/* TODO: Implementar lógica de drop zone aqui.
-                - Criar ref para esta View
-                - Usar measure() para obter posição e tamanho absolutos (pageX, pageY, width, height)
-                - Compartilhar bounds das zones com DraggableItems via Context ou props
-                - Detectar quando item é solto sobrepondo e animar item para dentro da zone,
-                  atualizar estado para mostrar item na zone */}
+          {/* Drop Zones */}
+          <View style={styles.dropZones}>
+            <View
+              ref={gostoRef}
+              style={styles.dropZone}
+              onLayout={() => measureZone("gosto", gostoRef)}
+            >
+              <Text style={styles.zoneTitle}>👍 Gosto</Text>
+              <View style={styles.zoneItems}>
+                {gostoItems.map((item) => (
+                  <DraggableItem key={item} item={item} />
+                ))}
+              </View>
+            </View>
+
+            <View
+              ref={naoGostoRef}
+              style={[styles.dropZone, { backgroundColor: "#FFE66D" }]}
+              onLayout={() => measureZone("nao_gosto", naoGostoRef)}
+            >
+              <Text style={styles.zoneTitle}>👎 Não Gosto</Text>
+              <View style={styles.zoneItems}>
+                {naoGostoItems.map((item) => (
+                  <DraggableItem key={item} item={item} />
+                ))}
+              </View>
+            </View>
           </View>
-          <View style={[styles.dropZone, { backgroundColor: "#FFE66D" }]}>
-            <Text style={styles.zoneTitle}>👎 Não Gosto</Text>
-            {/* Mesma lógica acima */}
-          </View>
-        </View>
-      </SafeAreaView>
-    </GestureHandlerRootView>
+        </SafeAreaView>
+      </GestureHandlerRootView>
+    </DropZoneContext.Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F9FA",
-  },
-  safeArea: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: "#F8F9FA" },
+  safeArea: { flex: 1 },
   title: {
     fontSize: 20,
     fontWeight: "bold",
@@ -59,6 +126,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     paddingHorizontal: 40,
     marginBottom: 40,
+    minHeight: 100,
   },
   dropZones: {
     flex: 1,
@@ -70,8 +138,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     backgroundColor: "#A8E6CF",
     borderRadius: 20,
-    justifyContent: "center",
     alignItems: "center",
+    paddingTop: 16,
     minHeight: 150,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -83,5 +151,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    marginBottom: 8,
+  },
+  zoneItems: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
 });
